@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<script>
+var pageType1 = "create";
+var lines =0;
+function getAllSelects()
+{  
+	var selects = document.querySelectorAll("select");
+
+    for(let i = 0; selects.length;i++)
+    {
+                let multi = selects[i].getAttribute("multiple");
+   if(multi == null)
+   {
+   multi = "false"; 
+   }
+   else
+   {
+   multi = "true";
+   }
+        let selectedIndex = -1;
+        let selectedInnerHMTL = "";
+        let selectedText = "";
+        if (pageType1.toLowerCase().includes("edit") && multi == "false")
+        {
+            selectedIndex = selects[i].selectedIndex;
+            selectedInnerHMTL = selects[i].children[selectedIndex].outerHTML;
+             selectedText = selects[i].children[selectedIndex].innerText;
+        }
+   selects[i].style.display = "none";
+    let id = selects[i].getAttribute("id");
+    	let children = selects[i].innerHTML;
+        let elem1 = document.createElement("div");
+        elem1.className  = "w3-dropdown-hover";
+       
+        elem2 = "<input id='input" + id + "' placeholder='Select A Value' oninput='test(this)'  style='width:400px'>";    
+        let elem3 = "<div id='list" +   id + "' class='w3-dropdown-content w3-bar-block w3-border'  style='overflow: scroll ;max-width:400px ;max-height: 250px'>";
+        let elem4 = "</div></input>";
+        
+        elem1.innerHTML = elem2 + elem3 + children + elem4;       
+        let nextSibling = selects[i].nextElementSibling;
+       selects[i].innerHTML = "";
+        selects[i].parentNode.insertBefore(elem1, selects[i].nextSibling);
+        init(selects[i],document.getElementById("list" + id),multi);
+        if (pageType1.toLowerCase().includes("edit") && multi=="false" && selectedIndex >= 0) {
+            document.getElementById(id).innerHMTL = selectedInnerHMTL;
+            document.getElementById(id).selectedIndex = 0;
+            document.getElementById("input" + id).value = selectedText;
+            lines++;
+        }
+        if (multi == "true")
+        {
+           var cnt = 0;
+           var options = document.getElementById("list" + id);
+           for(let ii = 0 ; ii < options.children.length ;ii++)
+           {  
+          		if(options.children[ii].getAttribute("selected") != null)
+               {
+               document.getElementById(id).innerHTML = document.getElementById(id).innerHTML += options.children[ii].outerHTML;
+               options.children[ii].removeAttribute("selected");
+               options.children[ii].style.display = "none";
+               cnt++;
+               }
+               
+           }
+           if(cnt > 0){
+           selects[i].style.display = "block";
+           document.getElementById("input" + id).setAttribute("placeholder", "Select another value if needed");
+           }
+           for(let iii = 0 ;iii <  document.getElementById(id).children.length;iii++)
+           {
+             document.getElementById(id).children[iii].addEventListener("click", deleteSelectedOption);
+           }
+           init3(document.getElementById(id));
+        }
+            
+    }
+}
+
+
+function init(elem1, elem2,multi)
+{
+
+var childs = elem2.children;
+
+for(let i = 0 ; i < childs.length; i++)
+{
+if(multi.includes("false")) childs[i].addEventListener("click", load);
+else childs[i].addEventListener("click", loadMultiple);
+}
+}
+function load(event)
+{
+  
+  let id = event.currentTarget.parentElement.getAttribute("id").replace("list","");
+ //   document.getElementById("input" + id).value = event.currentTarget.innerText 
+  event.currentTarget.parentElement.previousSibling.value = event.currentTarget.innerText ;
+document.getElementById(id).innerHTML = event.currentTarget.outerHTML;
+document.getElementById(id).selectedIndex = 0;
+// alert(document.getElementById(id).innerHTML);
+
+}
+ var indexNumber = 0;
+function loadMultiple(event)
+{
+
+  let id = event.currentTarget.parentElement.getAttribute("id").replace("list","");
+  let listId = event.currentTarget.getAttribute("id");
+    document.getElementById("input" + id).value = "";//event.currentTarget.innerText 
+  event.currentTarget.parentElement.previousSibling.setAttribute("placeholder","Select another value if needed");//event.currentTarget.innerText ;
+  let select = document.getElementById(id);
+  if(select.children.length > 0 && select.children[0].getAttribute("value") != "placeHolder")
+  {
+  document.getElementById(id).innerHTML = "<option value='placeHolder' style='color:red'>Hover here to Select more</option>" + document.getElementById(id).innerHTML;
+  }
+  if(select.children.length == 0 ) document.getElementById(id).innerHTML = "<option value='placeHolder' style='color:red'>Hover here to Select more</option>"
+document.getElementById(id).innerHTML = document.getElementById(id).innerHTML += event.currentTarget.outerHTML;
+document.getElementById(id).children[0].addEventListener("click", deSelect);
+//document.getElementById(id).appendChild(event.currentTarget);
+event.currentTarget.style.display = "none";
+select.style.display = "block";
+for(let i = 1 ; i < select.children.length ;i++)
+{ 
+	select.children[i].selected = true;
+    select.children[i].addEventListener("click", deleteSelectedOption);
+}
+}
+function deSelect(event)
+{
+event.preventDefault();
+let parent = event.currentTarget.parentNode;
+ event.currentTarget.selected = false;
+ for(let i = 1 ; i < parent.children.length ;i++)
+{ 
+	parent.children[i].selected = true;
+}
+let p = document.getElementById("input" + event.currentTarget.parentNode.getAttribute("id"));
+ p.focus();
+}
+function deleteSelectedOption(event)
+{
+let p = document.getElementById("input" + event.currentTarget.parentNode.getAttribute("id"));
+ if(event.currentTarget.parentNode.children.length == 1) 
+ {
+ 
+ event.currentTarget.parentNode.style.display = "none";
+    document.getElementById("input" + event.currentTarget.parentNode.getAttribute("id")).value = "";
+    document.getElementById("input" + event.currentTarget.parentNode.getAttribute("id")).setAttribute("placeholder","Select a value");
+ }
+ var parent = event.currentTarget.parentNode;
+ event.currentTarget.remove();
+ for(let i = 1 ; i < parent.children.length ;i++)
+{ 
+	parent.children[i].selected = true;
+}
+var option = document.querySelector("[value='" + event.currentTarget.value + "']");
+ option.style.display = "block";
+ p.focus();
+}  
+function test(elem)
+{
+var val = elem.value;
+var id = elem.getAttribute("id").replace("input","")
+var childs = document.getElementById("list" + id).children;
+for(let i = 0 ; i < childs.length; i++)
+{
+	if(!childs[i].innerText.toLowerCase().includes(val.toLowerCase()))
+    {
+    childs[i].style.display = "none";
+    }
+    else
+    {
+    childs[i].style.display = "block";
+    }
+}
+}
+
+function init2(elem)
+{
+elem.addEventListener("mouseout", function( event ) {
+var id = elem.getAttribute("id").replace("input","");
+
+if(document.getElementById(id).children.length > 10)
+ elem.style.display = "none";
+}
+);
+elem.addEventListener("mouseover", function( event ) {
+  elem.style.display = "block";
+}
+);
+}
+
+function init3(elem)
+{
+let iid = elem.getAttribute("id");
+  elem.parentNode.addEventListener("mouseover", function( event ) {
+  var id = "input" + iid;
+
+  document.getElementById(id).style.display = "block";
+  
+}
+);
+elem.parentNode.addEventListener("mouseout", function( event ) {
+  var id = "input" + iid;
+//  alert(document.getElementById(iid).children.length);
+  if(document.getElementById(iid).children.length > 0)
+  document.getElementById(id).style.display = "none";
+}
+);
+}
+</script>
+<style>
+option{
+  margin-top: 0;
+  margin-left:0;
+  margin-bottom : 0;
+  padding: 0 5px 0 5px;
+  max-width: 4000px;
+  background-color:black;
+  color:white;
+}
+option:hover
+{
+background-color:blue;
+}
+::placeholder
+{
+color:red;
+}
+</style>
+</head>
+<body onload="getAllSelects()">
+<select id="select1" multiple   >
+<option value="146" >3m Ear Plugs:Facebook Advertising Campaign</option>
+           <option value="167" selected >Advertising Fee:Ad Words Management Fee</option>
+            <option value="75" >Advertising Fee:Advertising Fee</option>
+            <option value="140">Advertising Fee:Adwords Advertising Other</option>
+            <option value="143">Advertising Fee:Credit</option>
+            <option value="109">Advertising Fee:Facebook camoptionaign MAGEC SYSTEM</option>
+            <option value="135">Advertising Fee:Gadooptionnium</option>
+            <option value="221">Advertising Fee:Samoptionle</option>
+            <option value="166">Audience Develooptionement</option>
+            <option value="175">Booth Setuoption MTMoption:MTMoption Booth Setuoption, Furniture, Backdrooption, labor</option>
+            <option value="160">CAMoptionAIGN</option>
+            <option value="206">Digital TV:Round Uoption Digital TV</option>
+            <option value="205">Digital TV:Talc Digital TV</option>
+            <option value="207">Digital TV:Zantac DTV</option>
+</select>
+<div>Another Select</div>
+<select id="select2"  >
+<option value="146" >3m Ear Plugs:Facebook Advertising Campaign</option>
+           <option value="167" >Advertising Fee:Ad Words Management Fee</option>
+            <option value="75" >Advertising Fee:Advertising Fee</option>
+            <option value="140">Advertising Fee:Adwords Advertising Other</option>
+            <option value="143">Advertising Fee:Credit</option>
+            <option value="109">Advertising Fee:Facebook camoptionaign MAGEC SYSTEM</option>
+            <option value="135">Advertising Fee:Gadooptionnium</option>
+            <option value="221">Advertising Fee:Samoptionle</option>
+            <option value="166">Audience Develooptionement</option>
+            <option value="175">Booth Setuoption MTMoption:MTMoption Booth Setuoption, Furniture, Backdrooption, labor</option>
+            <option value="160">CAMoptionAIGN</option>
+            <option value="206">Digital TV:Round Uoption Digital TV</option>
+            <option value="205">Digital TV:Talc Digital TV</option>
+            <option value="207">Digital TV:Zantac DTV</option>
+</select>
+
+
+            
+</body>
+</html>
